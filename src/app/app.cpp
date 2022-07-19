@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "./my_index.h"
 #include "ccf/app_interface.h"
 #include "ccf/common_auth_policies.h"
 #include "ccf/http_query.h"
@@ -30,6 +31,8 @@ namespace app
 
   class AppHandlers : public ccf::UserEndpointRegistry
   {
+    std::shared_ptr<MyIndex> my_index;
+
   public:
     AppHandlers(ccfapp::AbstractNodeContext& context) :
       ccf::UserEndpointRegistry(context)
@@ -39,6 +42,9 @@ namespace app
         "This minimal CCF C++ application aims to be "
         "used as a template for CCF developers.";
       openapi_info.document_version = "0.0.1";
+
+      my_index = std::make_shared<MyIndex>(RECORDS);
+      context.get_indexing_strategies().install_strategy(my_index);
 
       auto write = [this](auto& ctx, nlohmann::json&& params) {
         const auto parsed_query =
